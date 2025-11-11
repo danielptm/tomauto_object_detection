@@ -1,0 +1,7 @@
+path: /home/daniel/projects/tomauto_object_detection/YOLODataset
+train: images/train
+val: images/val
+test:
+
+names:
+    0: big_arrow
