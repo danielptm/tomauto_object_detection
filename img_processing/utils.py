@@ -50,3 +50,29 @@ def shape_to_black_background_to_white(gray):
     cv2.drawContours(output, [largest], -1, 0, thickness=cv2.FILLED)
 
     return output
+
+def get_distance_between_2_pts(p1, p2):
+    return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+
+def flatten_double_array(array):
+    res = []
+    for a in array:
+        res.append(a[0])
+    return res
+
+def find_2_furthest_pt_sets(array):
+    long1 = 0
+    long2 = 0
+    long1_pts = ""
+    long2_pts = ""
+    for i in range(len(array) - 1):
+        for j in range(len(array) - 1):
+            if i != j:
+                distance = get_distance_between_2_pts(array[i], array[j])
+                if distance > long1:
+                    long1 = distance
+                    long1_pts = str(array[i]) + ":" + str(array[j])
+                if distance > long2:
+                    long2 = distance
+                    long2_pts = str(array[i]) + ":" + str(array[j])
+    return [long1_pts, long1, long2_pts, long2]
