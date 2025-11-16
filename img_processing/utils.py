@@ -2,6 +2,29 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
+
+class Line:
+    def __init__(self, p1, p2, priority):
+        self.p1 = p1
+        self.p2 = p2
+        self.priority = priority
+
+class Pq:
+    def __init__(self):
+        self.items = []
+
+
+
+    def insert(self, item: Line):
+        self.items.append(item)
+        self.items.sort(key=lambda x: x.priority)
+
+    def pop(self):
+        return self.items.pop(0)
+
+    def is_empty(self):
+        return len(self.items) == 0
+
 def get_corners(np_img):
     corners = cv2.goodFeaturesToTrack(np_img,
                                       maxCorners=7,
@@ -61,18 +84,11 @@ def flatten_double_array(array):
     return res
 
 def find_2_furthest_pt_sets(array):
-    long1 = 0
-    long2 = 0
-    long1_pts = ""
-    long2_pts = ""
+    pq = Pq()
     for i in range(len(array) - 1):
         for j in range(len(array) - 1):
-            if i != j:
-                distance = get_distance_between_2_pts(array[i], array[j])
-                if distance > long1:
-                    long1 = distance
-                    long1_pts = str(array[i]) + ":" + str(array[j])
-                if distance > long2:
-                    long2 = distance
-                    long2_pts = str(array[i]) + ":" + str(array[j])
-    return [long1_pts, long1, long2_pts, long2]
+            distance = get_distance_between_2_pts(array[i], array[j])
+            line = Line(array[i], array[j], distance)
+            pq.insert(line)
+
+    return pq
