@@ -85,6 +85,13 @@ def flatten_double_array(array):
         res.append(a[0])
     return res
 
+def flatten_array_all(array):
+    res = []
+    for a in array:
+        res.append(a.p1)
+        res.append(a.p2)
+    return res
+
 def get_furthest_pts(array):
     pq = Pq()
     for i in range(len(array)):
