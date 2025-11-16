@@ -85,15 +85,28 @@ def flatten_double_array(array):
         res.append(a[0])
     return res
 
-def find_2_furthest_pt_sets(array):
+def get_furthest_pts(array):
     pq = Pq()
     for i in range(len(array)):
         for j in range(len(array)):
             distance = get_distance_between_2_pts(array[i], array[j])
             line = Line(array[i], array[j], distance)
             pq.insert(line)
-    return pq
+    return [pq.items[len(pq.items) - 1], pq.items[len(pq.items) - 3], pq.items[len(pq.items) - 5]]
 
-def get_pts(pq):
-    res = {"l1": pq.items[len(pq.items) - 1], "l2": pq.items[len(pq.items) - 2]}
-    return res
+def set_pts(array):
+    hp = None
+    b1 = None
+    b2 = None
+    for i in range(len(array)):
+        for j in range(len(array)):
+            if array[i] == array[j]:
+                hp = array[i]
+                break
+    for a in array:
+        if a != hp and a != b1:
+            b1 = a
+        elif a != hp and a != b2:
+            b2 = a
+    return {'hp': hp, 'b1': b1, 'b2': b2}
+
