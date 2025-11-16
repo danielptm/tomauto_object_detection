@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -75,7 +77,7 @@ def shape_to_black_background_to_white(gray):
     return output
 
 def get_distance_between_2_pts(p1, p2):
-    return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
 
 def flatten_double_array(array):
     res = []
@@ -85,10 +87,13 @@ def flatten_double_array(array):
 
 def find_2_furthest_pt_sets(array):
     pq = Pq()
-    for i in range(len(array) - 1):
-        for j in range(len(array) - 1):
+    for i in range(len(array)):
+        for j in range(len(array)):
             distance = get_distance_between_2_pts(array[i], array[j])
             line = Line(array[i], array[j], distance)
             pq.insert(line)
-
     return pq
+
+def get_pts(pq):
+    res = {"l1": pq.items[len(pq.items) - 1], "l2": pq.items[len(pq.items) - 2]}
+    return res
