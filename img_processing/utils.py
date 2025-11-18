@@ -74,8 +74,8 @@ class ArrowParser():
     def __init__(self, black_white_img):
         self.black_white_img = black_white_img
 
-    def get_corners(self, np_img):
-        corners = cv2.goodFeaturesToTrack(np_img,
+    def get_corners(self):
+        corners = cv2.goodFeaturesToTrack(self.black_white_img,
                                           maxCorners=7,
                                           qualityLevel=0.1,
                                           minDistance=2)
