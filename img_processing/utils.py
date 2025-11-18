@@ -27,16 +27,9 @@ class Pq:
     def is_empty(self):
         return len(self.items) == 0
 
-def get_corners(np_img):
-    corners = cv2.goodFeaturesToTrack(np_img,
-                                      maxCorners=7,
-                                      qualityLevel=0.1,
-                                      minDistance=2)
 
-    corners = np.uint64(corners)
-    return corners
 
-def create_img_np_array(p):
+def create_gray_image_from_path(p):
     img = cv2.imread(p)       # Reads as BGR by default
     img_array = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
@@ -51,7 +44,7 @@ def show_image(img):
     plt.show()
 
 
-def shape_to_black_background_to_white(gray):
+def remove_background_and_make_foreground_white(gray):
 
     # Blur to reduce noise
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -76,14 +69,32 @@ def shape_to_black_background_to_white(gray):
 
     return output
 
+
+class ArrowParser():
+    def __init__(self, black_white_img):
+        self.black_white_img = black_white_img
+
+    def get_corners(self, np_img):
+        corners = cv2.goodFeaturesToTrack(np_img,
+                                          maxCorners=7,
+                                          qualityLevel=0.1,
+                                          minDistance=2)
+
+        corners = np.uint64(corners)
+        approx = corners.tolist()
+        res = self.flatten_double_array(approx)
+        return res
+
+    def flatten_double_array(self, array):
+        res = []
+        for a in array:
+            res.append(a[0])
+        return res
+
+
 def get_distance_between_2_pts(p1, p2):
     return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
 
-def flatten_double_array(array):
-    res = []
-    for a in array:
-        res.append(a[0])
-    return res
 
 def flatten_array_all(array):
     res = []
