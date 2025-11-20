@@ -3,7 +3,7 @@ import math
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-
+from collections import defaultdict
 
 class Line:
     def __init__(self, p1, p2, priority):
@@ -73,6 +73,12 @@ def remove_background_and_make_foreground_white(gray):
 class ArrowParser():
     def __init__(self, black_white_img):
         self.black_white_img = black_white_img
+        self.dp = None
+        self.bp1 = None
+        self.bp2 = None
+        self.bp_mp = None
+        self.angle = None
+
 
     def get_corners(self):
         corners = cv2.goodFeaturesToTrack(self.black_white_img,
@@ -91,6 +97,63 @@ class ArrowParser():
             res.append(a[0])
         return res
 
+    def get_furthest_pts(self):
+        array = self.get_corners()
+        pq = Pq()
+        for i in range(len(array)):
+            for j in range(len(array)):
+                distance = get_distance_between_2_pts(array[i], array[j])
+                line = Line(array[i], array[j], distance)
+                pq.insert(line)
+        return [pq.items[len(pq.items) - 1], pq.items[len(pq.items) - 3]]
+
+    def set_pts(self):
+        objects = self.get_furthest_pts()
+        freq = defaultdict(int)
+
+        # Count frequency of each array
+        for obj in objects:
+            for arr in (obj.p1, obj.p2):  # access as attributes, not subscripts
+                arr = tuple(arr)  # hashable
+                freq[arr] += 1
+
+        # Sort arrays by frequency (highest first)
+        sorted_arrays = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+
+        for i, (arr, _) in enumerate(sorted_arrays):
+            if i == 0:
+                self.dp = list(arr)
+            else:
+                if self.bp1 is None:
+                    self.bp1 = list(arr)
+                elif self.bp2 is None:
+                    self.bp2 = list(arr)
+
+    def get_midpoint(self):
+        p1 = self.bp1
+        p2 = self.bp2
+
+        self.bp_mp = [
+            (p1[0] + p2[0]) // 2,
+            (p1[1] + p2[1]) // 2
+        ]
+
+    def get_direction_degrees(self):
+        bp = self.bp_mp
+        dp = self.dp
+
+        dx = dp[0] - bp[0]
+        dy = dp[1] - bp[1]
+
+        # Convert dy so smaller y = "up"
+        dy = -dy
+
+        # atan2 gives 0° on +x (right). We rotate so 0° is UP.
+        angle = math.degrees(math.atan2(dy, dx))
+        angle = (90 - angle) % 360
+
+        self.angle = angle
+
 
 def get_distance_between_2_pts(p1, p2):
     return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
@@ -103,28 +166,4 @@ def flatten_array_all(array):
         res.append(a.p2)
     return res
 
-def get_furthest_pts(array):
-    pq = Pq()
-    for i in range(len(array)):
-        for j in range(len(array)):
-            distance = get_distance_between_2_pts(array[i], array[j])
-            line = Line(array[i], array[j], distance)
-            pq.insert(line)
-    return [pq.items[len(pq.items) - 1], pq.items[len(pq.items) - 3], pq.items[len(pq.items) - 5]]
-
-def set_pts(array):
-    hp = None
-    b1 = None
-    b2 = None
-    for i in range(len(array)):
-        for j in range(len(array)):
-            if array[i] == array[j]:
-                hp = array[i]
-                break
-    for a in array:
-        if a != hp and a != b1:
-            b1 = a
-        elif a != hp and a != b2:
-            b2 = a
-    return {'hp': hp, 'b1': b1, 'b2': b2}
 
